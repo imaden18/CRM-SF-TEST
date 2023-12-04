@@ -15,13 +15,11 @@
   runs-on: ubuntu-latest
   steps:
   - uses: actions/checkout@v2
-    - name: Create the server.key file from the secret variable SERVER_KEY
-      run: echo "${{ secrets.SERVER_KEY }}"  > server.key
   - name: Set up Salesforce CLI
     uses: sfdx-actions/setup-sfdx@v1
   - name: Run Salesforce Tests
     run: |
-      sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_USERNAME }} --setdefaultdevhubusername --instanceurl ${{ secrets.SALESFORCE_instanceurl }}
+      sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile ${{ secrets.SERVER_KEY }} --username ${{ secrets.SALESFORCE_USERNAME }} --setdefaultdevhubusername --instanceurl ${{ secrets.SALESFORCE_instanceurl }}
       sfdx force:source:retrieve -x manifest/package.xml
       sfdx force:apex:test:run -r human -c -l RunLocalTests
   
