@@ -20,7 +20,8 @@ jobs:
         shell: bash
         
       - name: Authenticate to Salesforce
-        run: sfdx auth:jwt:grant --clientid ${{ secrets.CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.USERNAME }} --instanceurl ${{ secrets.LOGIN_URL }} --setdefaultusername
+        run: sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_USERNAME }} --setdefaultdevhubusername --instanceurl https://login.salesforce.com
+
 
       - name: Retrieve Metadata from Salesforce
         run: sfdx force:mdapi:retrieve -r retrieved-md -k package.xml -u ${{ secrets.USERNAME }}
