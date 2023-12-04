@@ -28,7 +28,7 @@ jobs:
 
       - name: Check for differences
         run: |
-          sfdx force:source:status --targetusername ${{ secrets.SALESFORCE_USERNAME }}
+               sfdx force:source:status --target-org ${{ secrets.SALESFORCE_USERNAME }}
 
       - name: Retrieve source from the org
         run: |
