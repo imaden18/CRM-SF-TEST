@@ -24,7 +24,7 @@ jobs:
 
 
       - name: Retrieve Metadata from Salesforce
-        run: sfdx force:mdapi:retrieve -r retrieved-md -k package.xml -u ${{ secrets.USERNAME }} --username ${{ secrets.SALESFORCE_USERNAME }}
+        run: sfdx force:mdapi:retrieve -r retrieved-md -k package.xml --username ${{ secrets.SALESFORCE_USERNAME }}
 
       - name: Unzip retrieved metadata
         run: unzip retrieved-md/unpackaged.zip -d retrieved-md/src
