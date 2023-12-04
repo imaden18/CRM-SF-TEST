@@ -1,0 +1,45 @@
+name: Salesforce CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Salesforce CLI
+      uses: sfdx-actions/setup-sfdx@v1
+
+    - name: Create the server.key file from the secret variable SERVER_KEY
+      run: echo "${{ secrets.SERVER_KEY }}" | base64 --decode > server.key
+      shell: bash
+
+    - name: Run Salesforce Tests
+      run: |
+        sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_USERNAME }} --setdefaultdevhubusername --instanceurl https://login.salesforce.com
+        sfdx force:source:retrieve -x manifest/package.xml
+        sfdx force:apex:test:run -r human -c -l RunLocalTests
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Salesforce CLI
+      uses: sfdx-actions/setup-sfdx@v1
+
+    - name: Deploy to Salesforce
+      run: |
+        sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_USERNAME }} --setdefaultdevhubusername --instanceurl https://login.salesforce.com
+        sfdx force:source:deploy -x manifest/package.xml
