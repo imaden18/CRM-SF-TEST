@@ -14,7 +14,7 @@
   build-and-test:
   runs-on: ubuntu-latest
   steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v2
   
   - name: Set up Salesforce CLI
     uses: sfdx-actions/setup-sfdx@v1
