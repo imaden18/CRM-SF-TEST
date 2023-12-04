@@ -26,8 +26,7 @@ jobs:
     - name: Run Salesforce Tests
       run: |
         sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_USERNAME }} --setdefaultdevhubusername --instanceurl https://login.salesforce.com
-        sfdx force:source:retrieve -x manifest/package.xml
-         sfdx project retrieve start -o ${{ secrets.SALESFORCE_USERNAME }}
+        sfdx project retrieve start -o imad.al-sid-chikh@resilient-badger-g5b68u.com	
         sfdx force:apex:test:run -r human -c -l RunLocalTests
 
   deploy:
