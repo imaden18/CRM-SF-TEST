@@ -4,7 +4,7 @@
 // IpAddress, UserAgent, and location information (such as Country and City). 
 
 global class AutocreatedDiscLoginHandler1700736162828 implements Auth.LoginDiscoveryHandler {
-
+//test Imad CICD
 global PageReference login(String identifier, String startUrl, Map<String, String> requestAttributes) {
 	if (identifier != null && isValidEmail(identifier)) {
 		// Search for user by email 
