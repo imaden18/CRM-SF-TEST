@@ -5,39 +5,43 @@ on:
     branches:
       - main
       - develop
-  pull_request:
-    branches:
-      - main
-      - develop
 
 jobs:
-  build-and-test:
+  retrieve-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Salesforce CLI
-      uses: sfdx-actions/setup-sfdx@v1
+      - name: Set up Salesforce CLI
+        uses: sfdx-actions/setup-sfdx@v1
 
-    - name: Create the server.key file from the secret variable SERVER_KEY
-      run: echo "${{ secrets.SERVER_KEY }}" | base64 --decode > server.key
-      shell: bash
+      - name: Create the server.key file from the secret variable
+        run: echo "${{ secrets.SERVER_KEY }}" | base64 --decode > server.key
+        shell: bash
+        
+      - name: Authenticate to Salesforce
+        run: sfdx auth:jwt:grant --clientid ${{ secrets.CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.USERNAME }} --instanceurl ${{ secrets.LOGIN_URL }} --setdefaultusername
 
-    - name: Run Salesforce Tests
-      run: |
-        sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_USERNAME }} --setdefaultdevhubusername --instanceurl https://login.salesforce.com
-        sfdx project retrieve start -o imad.al-sid-chikh@resilient-badger-g5b68u.com	
-  deploy:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-    - uses: actions/checkout@v2
+      - name: Retrieve Metadata from Salesforce
+        run: sfdx force:mdapi:retrieve -r retrieved-md -k package.xml -u ${{ secrets.USERNAME }}
 
-    - name: Set up Salesforce CLI
-      uses: sfdx-actions/setup-sfdx@v1
+      - name: Unzip retrieved metadata
+        run: unzip retrieved-md/unpackaged.zip -d retrieved-md/src
 
-    - name: Deploy to Salesforce
-      run: |
-        sfdx force:auth:jwt:grant --clientid ${{ secrets.SALESFORCE_CONSUMER_KEY }} --jwtkeyfile server.key --username ${{ secrets.SALESFORCE_USERNAME }} --setdefaultdevhubusername --instanceurl https://login.salesforce.com
-        sfdx force:source:deploy -x manifest/package.xml
+      - name: Convert retrieved metadata to SFDX format
+        run: sfdx force:mdapi:convert -r retrieved-md/src -d force-app
+
+      - name: Identify changes
+        id: files_changed
+        run: |
+          echo "::set-output name=changed_files::$(git diff --name-only HEAD~1)"
+
+      - name: Deploy changes if there are any
+        if: steps.files_changed.outputs.changed_files != ''
+        run: |
+          # Add logic to filter out changes that need to be deployed based on the previous step's output
+          # This is a placeholder for the deployment command
+          # You would typically use `sfdx force:source:deploy` with the path to the changed files
+          echo "Deploying the following changes:"
+          echo ${{ steps.files_changed.outputs.changed_files }}
+          # Deploy command goes here
